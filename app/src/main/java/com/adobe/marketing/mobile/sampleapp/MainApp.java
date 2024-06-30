@@ -1,0 +1,104 @@
+/*
+ Copyright 2020 Adobe
+ All Rights Reserved.
+
+ NOTICE: Adobe permits you to use, modify, and distribute this file in
+ accordance with the terms of the Adobe license agreement accompanying
+ it.
+ */
+package com.adobe.marketing.mobile.sampleapp;
+
+import com.adobe.marketing.mobile.AdobeCallback;
+import com.adobe.marketing.mobile.Assurance;
+import com.adobe.marketing.mobile.Edge;
+import com.adobe.marketing.mobile.Extension;
+import com.adobe.marketing.mobile.Identity;
+import com.adobe.marketing.mobile.Lifecycle;
+import com.adobe.marketing.mobile.LoggingMode;
+import com.adobe.marketing.mobile.Messaging;
+import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.Signal;
+import com.adobe.marketing.mobile.UserProfile;
+import com.adobe.marketing.mobile.edge.consent.Consent;
+//import com.adobe.marketing.mobile.edge.identity.Identity;
+import java.util.Arrays;
+import java.util.List;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
+
+import android.app.Application;
+import android.content.Context;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.multidex.MultiDex;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainApp extends Application {
+
+    private static final String LOG_TAG = "MainApp";
+    // TODO: Set up the preferred Environment File ID from your mobile property configured in Data Collection UI
+
+    //private static final String ENVIRONMENT_FILE_ID = "a5ea4e8f4344/3181a874a115/launch-627fd4e65e3f-development";
+    private static final String ENVIRONMENT_FILE_ID = "a7040fd7d6ac/8a370ad356ac/launch-992f2e0a85ea-development";
+    private static Context context;
+
+    public static Context getAppContext() {
+        return MainApp.context;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        MainApp.context = getApplicationContext();
+
+        MobileCore.setApplication(this);
+        MobileCore.setLogLevel(LoggingMode.DEBUG);
+        MobileCore.setSmallIconResourceID(R.mipmap.ic_launcher_round);
+        MobileCore.setLargeIconResourceID(R.mipmap.ic_launcher_round);
+        MobileCore.configureWithAppID(ENVIRONMENT_FILE_ID);
+
+        List<Class<? extends Extension>> extensions = new ArrayList<>();
+        extensions.add(Lifecycle.EXTENSION);
+        extensions.add(Signal.EXTENSION);
+        extensions.add(UserProfile.EXTENSION);
+        extensions.add(Edge.EXTENSION);
+        extensions.add(Assurance.EXTENSION);
+        extensions.add(Consent.EXTENSION);
+        extensions.add(Messaging.EXTENSION);
+        extensions.add(com.adobe.marketing.mobile.Identity.EXTENSION);
+        extensions.add(com.adobe.marketing.mobile.edge.identity.Identity.EXTENSION);
+        MobileCore.registerExtensions(extensions, o -> {
+            Log.d(LOG_TAG, "AEP Mobile SDK is initialized");
+        });
+
+        try {
+            FirebaseMessaging.getInstance().getToken()
+                    .addOnCompleteListener(new OnCompleteListener<String>() {
+                        @Override
+                        public void onComplete(@NonNull Task<String> task) {
+                            if (!task.isSuccessful()) {
+                                Log.w(LOG_TAG, "Fetching FCM registration token failed", task.getException());
+                                return;
+                            }
+
+                            // Get new FCM registration token
+                            String token = task.getResult();
+                            MobileCore.setPushIdentifier(token);
+                        }
+                    });
+        } catch (IllegalArgumentException e) {
+            Log.e(LOG_TAG, "IllegalArgumentException - Check if google-services.json is added and is correctly configured. \nError message: " + e.getLocalizedMessage());
+        }
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
+}

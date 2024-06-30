@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "150095250169",
+    "project_id": "aep-sample-app-98ca3",
+    "storage_bucket": "aep-sample-app-98ca3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150095250169:android:c5201941ea8a12cc695828",
+        "android_client_info": {
+          "package_name": "com.adobe.marketing.mobile.sampleapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfFILFXYbDu0aQZwqiNONaFOirSOjNYI8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
